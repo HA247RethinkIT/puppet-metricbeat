@@ -12,12 +12,20 @@ define metricbeat::modulesd(
   } elsif $source {
     $default_source = $source
   }
+  if $::kernel == 'Windows' {
+    $file_owner = 'BUILTIN\\Administrators'
+    $file_group = 'BUILTIN\\Administrators'
+  } else {
+    $file_owner = 'root'
+    $file_group = 'root'
+  }
+
   file { "${metricbeat::config_dir}/modules.d/${template_name}.yml":
     ensure  => present,
     source  => $default_source,
     content => $content,
-    owner   => 'root',
-    group   => 'root',
+    owner   => $file_owner,
+    group   => $file_group,
     mode    => '0644',
     require => Class['::metricbeat'],
     notify  => Class['::metricbeat::service'],
