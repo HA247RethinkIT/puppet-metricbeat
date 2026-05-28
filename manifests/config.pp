@@ -108,11 +108,22 @@ class metricbeat::config inherits metricbeat {
         }
       }
 
+      file{$metricbeat::config_dir:
+        ensure  => directory,
+        require => Package['metricbeat'],
+      }
+
+      file{"${metricbeat::config_dir}/modules.d":
+        ensure  => directory,
+        require => File[$metricbeat::config_dir],
+      }
+
       file{'metricbeat.yml':
         ensure       => $metricbeat::ensure,
         path         => "${metricbeat::config_dir}/metricbeat.yml",
         content      => inline_template('<%= @metricbeat_config.to_yaml() %>'),
         validate_cmd => $validate_cmd,
+        require      => File[$metricbeat::config_dir],
       }
     }
     default: {
